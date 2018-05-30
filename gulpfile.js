@@ -1,8 +1,6 @@
 'use strict'
 
 const gulp = require('gulp');
-const concat = require('gulp-concat'); //used for concatinating js files
-const uglify = require('gulp-uglify'); //used to minify js files
 const rename = require('gulp-rename'); //used to rename files
 const sass = require('gulp-sass');	//used to compile sass
 const maps = require('gulp-sourcemaps'); //used to make sourcemaps files for js, css, scss,less
@@ -34,7 +32,7 @@ gulp.task('getHTML', function () {
 // gets js filses and places them in dist
 gulp.task('getScripts', function () {
     return gulp.src('src/assets/js/**') // run the Twig template parser on all .html files in the "src" directory
-        .pipe(gulp.dest('./dist'))
+        .pipe(gulp.dest('./dist/assets/js'))
         .pipe(browserSync.stream());
 });
 
@@ -87,18 +85,18 @@ gulp.task('clean', function () {
 
 // the build task builds the project in the dist folder by running the associated tasks  
 gulp.task('build', ['minifyCss'], function () {
-    return gulp.src(["./src/assets/img/**", "./src/assets/css/**", "./src/assets/js/**", "./src/assets/**/*.html"], { base: './src' })
+    return gulp.src(["./src/assets/img/**", "./src/assets/css/**", "./src/assets/js/**", "./src/**/*.html", "./src/data/**"], { base: './src' })
         .pipe(gulp.dest('dist'));
 });
 
 // the prod task builds the project without source-maps in the dist folder by running the associated tasks  
 gulp.task('prod', ['minifyCss-noMaps'], function () {
-    return gulp.src(["./src/assets/img/**", "./src/assets/css/**", "./src/assets/js/**", "./src/assets/**/*.html"], { base: './src' })
+    return gulp.src(["./src/assets/img/**", "./src/assets/css/**", "./src/assets/js/**", "./src/**/*.html", "./src/data/**"], { base: './src' })
         .pipe(gulp.dest('dist'));
 });
 
 // default task is set to start the watch listeners
-gulp.task('default', [], function () {
+gulp.task('default', ["build"], function () {
     gulp.start(['watchFiles']);
 });
 
