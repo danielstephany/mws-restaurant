@@ -14,7 +14,7 @@ const prettify = require('gulp-prettify'); //properly indents html files
 var supported = [
     'last 5 versions',
     'safari >= 8',
-    'ie >= 9',
+    'ie >= 11',
     'ff >= 20',
     'ios 6',
     'android 4'
@@ -41,17 +41,23 @@ gulp.task('getScripts', function () {
 // minifies css to main.min.css
 // writes source maps
 // places both in dist/css
-gulp.task('minifyCss', function () {
-    return gulp.src('src/scss/main.scss')
-        .pipe(maps.init())
-        .pipe(sass())
-        .pipe(cssnano({
-            autoprefixer: { browsers: supported, add: true }
-        }))
-        .pipe(rename("main.min.css"))
-        .pipe(maps.write('./'))
-        .pipe(gulp.dest('./dist/assets/css'))
-        .pipe(browserSync.stream());
+gulp.task('compileScss', function() {
+	return gulp.src('./src/assets/scss/main.scss')
+	.pipe(maps.init())
+    .pipe(sass())
+	.pipe(cssnano({
+		autoprefixer: {browsers: supported, add: true}
+	}))
+	// .pipe(rename("main.min.css"))
+	.pipe(maps.write('./'))
+	.pipe(gulp.dest('./dist/assets/css'))
+    
+});
+
+gulp.task("reload-scss", ["compileScss"], function(){
+    return gulp.src("/").pipe(browserSync.reload({
+        stream: true
+    }));
 });
 
 //this task does the same as minifyCss minus sourcemaps and browsersync
@@ -61,7 +67,7 @@ gulp.task('minifyCss-noMaps', function () {
         .pipe(cssnano({
             autoprefixer: { browsers: supported, add: true }
         }))
-        .pipe(rename("main.min.css"))
+        // .pipe(rename("main.min.css"))
         .pipe(gulp.dest('./dist/assets/css'))
 });
 
@@ -70,10 +76,9 @@ gulp.task('minifyCss-noMaps', function () {
 // watches html, js, and scss and runs associated tasks
 gulp.task('watchFiles', ['build'], function () {
     browserSync.init({
-        server: "./dist",
-        notify: false
+        server: "./dist"
     });
-    gulp.watch('./src/assets/scss/**/*.scss', ['minifyCss']);
+    gulp.watch('./src/assets/scss/**/*.scss', ['reload-scss']);
     gulp.watch('./src/assets/js/**/*.js', ['getScripts']);
     gulp.watch('./src/**/*.html', ['getHTML']);
 });
@@ -84,8 +89,8 @@ gulp.task('clean', function () {
 });
 
 // the build task builds the project in the dist folder by running the associated tasks  
-gulp.task('build', ['minifyCss'], function () {
-    return gulp.src(["./src/assets/img/**", "./src/assets/css/**", "./src/assets/js/**", "./src/**/*.html", "./src/data/**"], { base: './src' })
+gulp.task('build', ['compileScss'], function () {
+    return gulp.src(["./src/assets/img/**", "./src/assets/js/**", "./src/**/*.html", "./src/data/**"], { base: './src' })
         .pipe(gulp.dest('dist'));
 });
 

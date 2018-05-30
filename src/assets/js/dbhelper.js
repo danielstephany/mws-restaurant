@@ -152,7 +152,7 @@ class DBHelper {
   static imageUrlForRestaurant(restaurant) {
     return (`assets/img/${restaurant.photograph}`);
   }
-
+ 
   /**
    * Map marker for a restaurant.
    */
