@@ -161,6 +161,11 @@ fillBreadcrumb = (restaurant=self.restaurant) => {
 /**
  * Get a parameter by name from page URL.
  */
+
+
+ /**
+ * auto adjust header spacing in reviews page
+ */
 getParameterByName = (name, url) => {
   if (!url)
     url = window.location.href;
@@ -191,10 +196,12 @@ class SetHeaderSpacer {
   }
   
   init() {
-    this.setSpacer();
-    window.addEventListener('resize', () => {
+    if (this._body){
       this.setSpacer();
-    });
+      window.addEventListener('resize', () => {
+        this.setSpacer();
+      });
+    }
   }
 }
 
