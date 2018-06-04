@@ -1,4 +1,14 @@
-/* ====================== Navigation ====================== */
+/* ====================== Main-header and Navigation ====================== */
+.main-header {
+    position: relative;
+     .breadcrumb {
+        width: 50%;
+        position: absolute;
+        top: 100%;
+        left: 0;
+    }
+}
+
 .main-nav {
   display: flex;
   align-items: center;
@@ -22,4 +32,13 @@
     }
 }
 
-
+@media (max-width: 800px){
+    .main-header {
+        position: relative;
+        .breadcrumb {
+            width: 100%;
+            position: static;
+            top: initial;
+        }
+    }
+}

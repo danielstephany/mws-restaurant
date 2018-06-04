@@ -117,21 +117,33 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
  */
 createReviewHTML = (review) => {
   const li = document.createElement('li');
+  li.className = "review-card";
+
+  const header = document.createElement("header");
+  li.appendChild(header);
+
   const name = document.createElement('p');
+  name.className = "name";
   name.innerHTML = review.name;
-  li.appendChild(name);
+  header.appendChild(name);
 
   const date = document.createElement('p');
+  date.className = "date";
   date.innerHTML = review.date;
-  li.appendChild(date);
+  header.appendChild(date);
 
-  const rating = document.createElement('p');
+  const reviewCardContent = document.createElement('div');
+  reviewCardContent.className = "review-card__content";
+  li.appendChild(reviewCardContent);
+
+  const rating = document.createElement('span');
+  rating.className = "rating";
   rating.innerHTML = `Rating: ${review.rating}`;
-  li.appendChild(rating);
+  reviewCardContent.appendChild(rating);
 
   const comments = document.createElement('p');
   comments.innerHTML = review.comments;
-  li.appendChild(comments);
+  reviewCardContent.appendChild(comments);
 
   return li;
 }
@@ -161,3 +173,30 @@ getParameterByName = (name, url) => {
     return '';
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
+
+class SetHeaderSpacer {
+  constructor(){
+    this._body = document.querySelector(".inside");
+    this._header = document.querySelector(".main-header");
+    this.init();
+  }
+
+  setSpacer (){
+    if (window.innerWidth <= 800 && this._body) {
+      const headerHeight = this._header.clientHeight;
+      this._body.style.paddingTop = headerHeight + "px";
+    }else {
+      this._body.style.paddingTop = "0px";
+    }
+  }
+  
+  init() {
+    this.setSpacer();
+    window.addEventListener('resize', () => {
+      this.setSpacer();
+    });
+  }
+}
+
+const autoSetHeaderSpace = new SetHeaderSpacer;
+// autoSetHeaderSpace.init();
