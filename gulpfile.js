@@ -23,15 +23,22 @@ var supported = [
 
 // gets html filses, prettifys them, and places them in dist
 gulp.task('getHTML', function () {
-    return gulp.src('src/**/*.html') // run the Twig template parser on all .html files in the "src" directory
+    return gulp.src('src/**/*.html')
     .pipe(prettify())
     .pipe(gulp.dest('./dist'))    
     .pipe(browserSync.stream());
 });
 
+// update sw.js in dist
+gulp.task('getSw', function () {
+    return gulp.src('src/sw.js')
+        .pipe(gulp.dest('./dist'))
+        .pipe(browserSync.stream());
+});
+
 // gets js filses and places them in dist
 gulp.task('getScripts', function () {
-    return gulp.src('src/assets/js/**') // run the Twig template parser on all .html files in the "src" directory
+    return gulp.src('src/assets/js/**')
         .pipe(gulp.dest('./dist/assets/js'))
         .pipe(browserSync.stream());
 });
@@ -81,6 +88,7 @@ gulp.task('watchFiles', ['build'], function () {
     gulp.watch('./src/assets/scss/**/*.scss', ['reload-scss']);
     gulp.watch('./src/assets/js/**/*.js', ['getScripts']);
     gulp.watch('./src/**/*.html', ['getHTML']);
+    gulp.watch('./src/sw.js', ['getSw']);
 });
 
 // deletes the dist folder and its contents 
@@ -90,13 +98,13 @@ gulp.task('clean', function () {
 
 // the build task builds the project in the dist folder by running the associated tasks  
 gulp.task('build', ['compileScss'], function () {
-    return gulp.src(["./src/assets/img/**", "./src/assets/js/**", "./src/**/*.html", "./src/data/**"], { base: './src' })
+    return gulp.src(["./src/sw.js", "./src/assets/img/**", "./src/assets/js/**", "./src/**/*.html", "./src/data/**"], { base: './src' })
         .pipe(gulp.dest('dist'));
 });
 
 // the prod task builds the project without source-maps in the dist folder by running the associated tasks  
 gulp.task('prod', ['minifyCss-noMaps'], function () {
-    return gulp.src(["./src/assets/img/**", "./src/assets/css/**", "./src/assets/js/**", "./src/**/*.html", "./src/data/**"], { base: './src' })
+    return gulp.src(["./src/sw.js", "./src/assets/img/**", "./src/assets/css/**", "./src/assets/js/**", "./src/**/*.html", "./src/data/**"], { base: './src' })
         .pipe(gulp.dest('dist'));
 });
 

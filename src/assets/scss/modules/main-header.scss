@@ -7,6 +7,22 @@
         top: 100%;
         left: 0;
     }
+     .skip-link {
+        border-radius: 0 0 4px 0;
+        display: inline-block;
+        position: absolute;
+        top:0;
+        left: 0;
+        background: #fff;
+        padding: 5px 15px;
+        transition: transform 0.25s ease;
+        transform: translateY(-100%);
+        color: orange;
+        &:focus {
+            transform: translateY(0);
+            color: orange
+        }
+    }
 }
 
 .main-nav {
