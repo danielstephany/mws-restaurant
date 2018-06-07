@@ -2,6 +2,7 @@
 /**
  * serviceWorker
  */
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js')
     .then(function (reg) {
@@ -12,7 +13,6 @@ if ('serviceWorker' in navigator) {
       console.log('Registration failed with ' + error);
     });
 }
-
 
 /**
  * Common database helper functions.

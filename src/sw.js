@@ -15,14 +15,14 @@ self.addEventListener('install', function (event) {
                 '/assets/img/4.jpg',
                 '/assets/img/5.jpg',
                 '/assets/img/6.jpg',
-                '/assets/img/7.jpg',
+                '/assets/img/7.jpg', 
                 '/assets/img/8.jpg',
                 '/assets/img/9.jpg',
                 '/assets/img/10.jpg',
-                '//normalize-css.googlecode.com/svn/trunk/normalize.css',
-            ]);
-        })
-    );
+                'https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css'
+            ]); 
+        })   
+    );   
 });
 
 self.addEventListener('fetch', function (event) {
@@ -34,13 +34,11 @@ self.addEventListener('fetch', function (event) {
         return;
     }
     if (requestUrl.pathname === '/') {
-        console.log("nailed it");
         event.respondWith(caches.match('/index.html').then((response) => {
             return response || fetch(event.request);
         }));
         return;
     }
-    console.log(requestUrl.pathname);
     event.respondWith(
         caches.match(event.request).then(function (response) {
             return response || fetch(event.request);

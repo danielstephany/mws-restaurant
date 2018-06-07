@@ -52,10 +52,7 @@ gulp.task('compileScss', function() {
 	return gulp.src('./src/assets/scss/main.scss')
 	.pipe(maps.init())
     .pipe(sass())
-	.pipe(cssnano({
-		autoprefixer: {browsers: supported, add: true}
-	}))
-	// .pipe(rename("main.min.css"))
+	.pipe(autoprefixer( {browsers: supported, add: true}))
 	.pipe(maps.write('./'))
 	.pipe(gulp.dest('./dist/assets/css'))
     
