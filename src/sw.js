@@ -6,6 +6,7 @@ self.addEventListener('install', function (event) {
                 '/restaurant.html',
                 '/data/restaurants.json',
                 '/assets/css/main.css',
+                '/assets/js/idb.js',
                 '/assets/js/main.js',
                 '/assets/js/dbhelper.js',
                 '/assets/js/restaurant_info.js',
@@ -19,7 +20,7 @@ self.addEventListener('install', function (event) {
                 '/assets/img/8.jpg',
                 '/assets/img/9.jpg',
                 '/assets/img/10.jpg',
-                'https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css'
+                'https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css',
             ]); 
         })   
     );   
