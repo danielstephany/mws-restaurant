@@ -95,13 +95,13 @@ gulp.task('clean', function () {
 
 // the build task builds the project in the dist folder by running the associated tasks  
 gulp.task('build', ['compileScss'], function () {
-    return gulp.src(["./src/sw.js", "./src/assets/img/**", "./src/assets/js/**", "./src/**/*.html", "./src/data/**"], { base: './src' })
+    return gulp.src(["./src/manifest.json", "./src/icons/**", "./src/sw.js", "./src/assets/img/**", "./src/assets/js/**", "./src/**/*.html"], { base: './src' })
         .pipe(gulp.dest('dist'));
 });
 
 // the prod task builds the project without source-maps in the dist folder by running the associated tasks  
 gulp.task('prod', ['minifyCss-noMaps'], function () {
-    return gulp.src(["./src/sw.js", "./src/assets/img/**", "./src/assets/css/**", "./src/assets/js/**", "./src/**/*.html", "./src/data/**"], { base: './src' })
+    return gulp.src(["./src/manifest.json", "./src/icons/**", "./src/sw.js", "./src/assets/img/**", "./src/assets/css/**", "./src/assets/js/**", "./src/**/*.html"], { base: './src' })
         .pipe(gulp.dest('dist'));
 });
 
