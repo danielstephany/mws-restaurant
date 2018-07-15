@@ -19,18 +19,18 @@ const dbPromise = idb.open('restaurant-db', 3, function (upgradeDb) {
   switch (upgradeDb.oldVersion) {
     case 0:
       upgradeDb.createObjectStore('restaurants');
-      upgradeDb.createObjectStore('restaurantId');
+      const restaurantIdStore = upgradeDb.createObjectStore('restaurantId');
+      restaurantIdStore.createIndex('id', 'id');
   }
 });
+
 
 function saveRestaurantData(data){
   dbPromise.then(function (db) {
     const tx = db.transaction('restaurants', "readwrite");
     const restaurantStore = tx.objectStore('restaurants');
     return restaurantStore.put(data, 'restaurants');
-  }).then(function (val) {
-    console.log(val);
-  });
+  })
 }
 
 
@@ -38,24 +38,17 @@ function saveRestaurantIdData(id, data) {
   dbPromise.then(function (db) {
     const tx = db.transaction('restaurantId', "readwrite");
     const restaurantIdStore = tx.objectStore('restaurantId');
-    console.log(id);
-    return restaurantIdStore.put(data, id);
-  }).then(function (val) {
-    console.log(val);
+    restaurantIdStore.put(data, id);
+    restaurantIdStore.index('id').openCursor(null, "prev").then(function (cursor) {
+      return cursor.advance(10);
+    }).then(function deleteRest(cursor) {
+      if (!cursor) return;
+      cursor.delete();
+      return cursor.continue().then(deleteRest);
+    });
   });
 }
 
-
-function getRestaurantData() {
-  dbPromise.then(function (db) {
-    const tx = db.transaction('restaurants', "readwrite");
-    const restaurantStore = tx.objectStore('restaurants');
-    return restaurantStore.get('restaurants');
-  }).then(function (val) {
-    console.log(val);
-    return val;
-  });
-}
 
 /**
  * Common database helper functions.
@@ -82,18 +75,15 @@ class DBHelper {
       return restaurantStore.get('restaurants');
     }).then(function (val) {
       if(val){
-        console.log(1);
         callback(null, val);
       }
 
       fetch(DBHelper.DATABASE_URL)
         .then(res => res.json())
         .then((json) => {
-          console.log(json);
           const restaurants = json;
           saveRestaurantData(restaurants);
           if (!val) {
-            console.log('2');
             callback(null, restaurants);
           }
         }).catch((e) => {
@@ -114,20 +104,16 @@ class DBHelper {
       const restaurantIdStore = tx.objectStore('restaurantId');
       return restaurantIdStore.get(id);
     }).then(function (val) {
-      console.log(typeof val);
-      if(val !== undefined){
-        console.log(1);
+      if(val){
         callback(null, val);
       }
 
       fetch(`${DBHelper.DATABASE_URL}/${id}`)
         .then(res => res.json())
         .then((json) => {
-          console.log(json);
           const restaurants = json;
           
           if (val === undefined) {
-            console.log(2);
             saveRestaurantIdData(id, restaurants);
             callback(null, restaurants);
           }
