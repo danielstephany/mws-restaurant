@@ -136,6 +136,28 @@
   color: #666;
 }
 
+.favorite-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  .favorite-btn {
+    @extend .main-btn;
+    border-radius: 4px;
+    font-size: 14px;
+    margin: 0;
+  }
+  i {
+    color: #ccc;
+    font-size: 20px;
+  }
+  &.active {
+    i{
+      color: orange;
+    }
+  }
+}
+
 @media (max-width: 800px){
   .inside .map-container {
     box-shadow: none;
