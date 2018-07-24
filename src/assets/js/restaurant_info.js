@@ -18,6 +18,7 @@ window.initMap = () => {
       DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
     }
   });
+  handlefetchReviews();
 }
 
 /**
@@ -45,6 +46,15 @@ fetchRestaurantFromURL = (callback) => {
   }
 }
 
+handlefetchReviews = () => {
+  const id = getParameterByName('id');
+  DBHelper.fetchReviews(id)
+    .then((json) => {
+      self.reviews = json;
+      fillReviewsHTML();
+    }); 
+}
+
 /**
  * Create restaurant HTML and add it to the webpage
  */
@@ -57,7 +67,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
 
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img'
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  image.src = DBHelper.imageUrlForRestaurant(restaurant) + ".jpg";
   image.setAttribute('alt', restaurant.name + "restaurant");
 
   const cuisine = document.getElementById('restaurant-cuisine');
@@ -68,7 +78,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     fillRestaurantHoursHTML();
   }
   // fill reviews
-  fillReviewsHTML();
+
 }
 
 /**
@@ -94,7 +104,7 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.restaurant.reviews) => {
+fillReviewsHTML = (reviews = self.reviews) => {
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h3');
   title.innerHTML = 'Reviews';
@@ -110,7 +120,8 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
   reviews.forEach(review => {
     ul.appendChild(createReviewHTML(review));
   });
-  container.appendChild(ul);
+
+  container.insertBefore(title, ul);
 }
 
 /**
@@ -133,7 +144,8 @@ createReviewHTML = (review) => {
 
   const date = document.createElement('p');
   date.className = "date";
-  date.innerHTML = review.date;
+  let time = new Date(review.updatedAt);
+  date.innerHTML = time.toLocaleDateString();
   header.appendChild(date);
 
   const reviewCardContent = document.createElement('div');
@@ -212,3 +224,70 @@ class SetHeaderSpacer {
 
 const autoSetHeaderSpace = new SetHeaderSpacer;
 // autoSetHeaderSpace.init();
+
+
+(function(){
+  const reviewForm = document.getElementById("review-form");
+  const reviewName = document.getElementById("name");
+  const reviewBody = document.getElementById("review");
+  const reviewRating = document.getElementById("rating");
+  const id = getParameterByName('id');
+  let errorArray = [];
+  reviewForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    let validValues = true;
+
+    let reviewData = {
+      restaurant_id: parseInt(id),
+      name: reviewName.value,
+      rating: parseInt(reviewRating.value),
+      comments: reviewBody.value
+    }
+    
+    //remove old errs
+    if(errorArray.length !== 0){
+      errorArray.forEach((el)=>{
+        el.parentElement.classList.remove('error');
+        el.parentElement.removeChild(el);
+      });
+      errorArray = [];
+    }
+
+    //check for errors
+    if (!reviewName.value){
+      createError(reviewName, 'name is required');
+      validValues = false;
+    }
+    if (!reviewBody.value){
+      createError(reviewBody, 'review is required');
+      validValues = false;
+    }
+    if (!reviewRating.value){
+      createError(reviewRating, 'rating is required');
+      validValues = false;
+    }
+
+    if (validValues === true){
+      DBHelper.postReviewFetch(reviewData)
+      .then(json => {
+        const newReview = createReviewHTML(json);
+        document.getElementById('reviews-list').append(newReview);
+      });
+      reviewName.value = '';
+      reviewBody.value = '';
+      reviewRating.value = '';
+    }
+
+  });
+
+  function createError(errorEl ,text){
+    let errorMsg = document.createElement('span');
+    errorMsg.innerHTML = text;
+    errorMsg.className = 'error-msg';
+    errorMsg.setAttribute('role', "alert");
+    errorEl.parentElement.append(errorMsg);
+    errorEl.parentElement.classList.add('error');
+    errorArray.push(errorMsg);
+  }
+
+})();

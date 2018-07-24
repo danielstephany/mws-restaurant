@@ -1,0 +1,56 @@
+.review-form {
+    margin-bottom: 40px;
+    .form-item {
+        display: block;
+        margin-bottom: 10px;
+        label{
+            font-size: 16px;
+        }
+        input,
+        textarea {
+            border: 1px solid #ddd;
+            display: block;
+            width: 100%;
+            font-size: 14px;
+            padding: 5px;
+        }
+        textarea {
+            height: 100px;
+        }
+        [type="number"] {
+            display: inline-block;
+            width: auto;
+        }
+    }
+    .form-btn-container {
+        text-align: right;
+    }
+    .form-btn {
+        border-radius: 2px;
+        box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.25);
+        background-color: orange;
+        color: #fff;
+        display: inline-block;
+        font-size: 15px;
+        margin: 15px 0 0;
+        padding: 8px 30px 10px;
+        text-align: center;
+        text-transform: uppercase;
+        will-change: transform;
+        transition: transform 0.25s ease;
+        cursor: pointer;
+        &:hover {
+            transform: translateY(-3px);
+        }
+    }
+    .error {
+        input,
+        textarea{
+            border: 1px solid red;
+        }
+    }
+    .error-msg {
+        color: red;
+        font-size: 12px;
+    }
+}

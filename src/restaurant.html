@@ -6,6 +6,9 @@
   <meta name="theme-color" content="#ffffff" />
   <!-- Normalize.css for better cross-browser consistency -->
   <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.1/css/all.css" integrity="sha384-O8whS3fhG2OnA5Kas0Y9l3cfpmYjapjI0E4theH4iuMD+pLhbf6JI0jIMfYcK3yZ"
+    crossorigin="anonymous">
+
   <link rel="stylesheet" src="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
   <!-- Main CSS file -->
   <link rel="stylesheet" href="assets/css/main.css" type="text/css">
@@ -51,6 +54,27 @@
     <!-- Beginning reviews -->
     <section id="reviews-container" class="reviews-container">
       <ul id="reviews-list" class="reviews-list"></ul>
+      <!-- test -->
+      <div class="review-form">
+        <h3>Add a Review</h3>
+        <form id="review-form" class="review-form">
+          <div class="form-item">
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text">
+          </div>
+          <div class="form-item">
+            <label for='review'>Review</label>
+            <textarea name="" id="review" cols="30" rows="10"></textarea>
+          </div>
+          <div class="form-item">
+            <label for="rating">Rating</label>
+            <input id="rating" type="number" min="1" max="5">
+          </div>
+          <div class="form-btn-container">
+            <button class="form-btn" type="submit">Add Review</button>
+          </div>
+        </form>
+      </div>
     </section>
     <!-- End reviews -->
   </main>

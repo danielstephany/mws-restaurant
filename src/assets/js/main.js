@@ -140,7 +140,7 @@ createRestaurantHTML = (restaurant) => {
 
   const imgContainer = document.createElement("div");
   imgContainer.className = "image-container"
-  imgContainer.style.backgroundImage = "url("+DBHelper.imageUrlForRestaurant(restaurant) +")";
+  imgContainer.style.backgroundImage = "url("+DBHelper.imageUrlForRestaurant(restaurant) +".jpg)";
   imgContainer.setAttribute("role", "img");
   imgContainer.setAttribute("alt", restaurant.name);
   li.append(imgContainer);

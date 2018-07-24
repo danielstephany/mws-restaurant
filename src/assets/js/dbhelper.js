@@ -21,6 +21,11 @@ const dbPromise = idb.open('restaurant-db', 3, function (upgradeDb) {
       upgradeDb.createObjectStore('restaurants');
       const restaurantIdStore = upgradeDb.createObjectStore('restaurantId');
       restaurantIdStore.createIndex('id', 'id');
+
+      const restaurantReview = upgradeDb.createObjectStore('reviews');
+      restaurantReview.createIndex('restaurant_id', 'restaurant_id');
+
+      upgradeDb.createObjectStore('pendingReviews', { autoIncrement: true });
   }
 });
 
@@ -34,12 +39,28 @@ function saveRestaurantData(data){
 }
 
 
+function savePendingReviews(data) {
+  dbPromise.then(function (db) {
+    const tx = db.transaction('pendingReviews', "readwrite");
+    const pendingReviewsStore = tx.objectStore('pendingReviews');
+    return pendingReviewsStore.add(data);
+  })
+}
+
+function clearPendingReviews() {
+  dbPromise.then(function (db) {
+    const tx = db.transaction('pendingReviews', "readwrite");
+    const pendingReviewsStore = tx.objectStore('pendingReviews');
+    return pendingReviewsStore.clear();
+  })
+}
+
 function saveRestaurantIdData(id, data) {
   dbPromise.then(function (db) {
     const tx = db.transaction('restaurantId', "readwrite");
-    const restaurantIdStore = tx.objectStore('restaurantId');
-    restaurantIdStore.put(data, id);
-    restaurantIdStore.index('id').openCursor(null, "prev").then(function (cursor) {
+    const reviewsStore = tx.objectStore('restaurantId');
+    reviewsStore.put(data, id);
+    reviewsStore.index('id').openCursor(null, "prev").then(function (cursor) {
       return cursor.advance(10);
     }).then(function deleteRest(cursor) {
       if (!cursor) return;
@@ -48,6 +69,58 @@ function saveRestaurantIdData(id, data) {
     });
   });
 }
+
+function saveReview(data) {
+  dbPromise.then(function (db) {
+    const tx = db.transaction('reviews', "readwrite");
+    const restaurantIdStore = tx.objectStore('reviews');
+    restaurantIdStore.put(data, data.id);
+    restaurantIdStore.index('restaurant_id').openCursor(null, "prev").then(function (cursor) {
+        return cursor.advance(30);
+    }).then(function deleteRest(cursor) {
+      if (!cursor) return;
+      cursor.delete();
+      return cursor.continue().then(deleteRest);
+    });
+  });
+}
+
+(function(){
+  //add event listener to post pending reviews
+  window.addEventListener('online', function (e) {
+    dbPromise.then(function (db) {
+      const tx = db.transaction('pendingReviews', "readwrite");
+      const restaurantIdStore = tx.objectStore('pendingReviews');
+      return restaurantIdStore.getAll();
+    }).then(function (val) {
+      if (val) {
+        val.forEach((data) => {
+          handlePost(data);
+        });
+      }
+      // clear pending reveiws after submition
+      clearPendingReviews();
+    });
+  });
+
+  function handlePost(data){
+    fetch('http://localhost:1337/reviews/', {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      mode: "cors",
+      body: JSON.stringify(data)
+    })
+      .then(res => res.json())
+      .then(json => {
+        console.log(json);
+        return
+      })
+      .catch(e => console.log(e));
+  }
+})();
+
+
+
 
 
 /**
@@ -123,6 +196,64 @@ class DBHelper {
         });
     });
   }
+
+  //fetch store
+  static fetchReviews(id){
+    return new Promise((resolve, reject)=>{
+      if (!window.navigator.onLine) {
+        dbPromise.then(function (db) {
+          const tx = db.transaction('reviews', "readwrite");
+          const restaurantStore = tx.objectStore('reviews').index('restaurant_id');
+          return restaurantStore.getAll(parseInt(id))
+        }).then(function (val) {
+          return resolve(val);
+        });
+      }else {
+        handleFetch(resolve, id);
+      }
+
+      function handleFetch(resolve, id){
+        fetch(`http://localhost:1337/reviews/?restaurant_id=${id}`)
+          .then(res => res.json())
+          .then(json => {
+            if (json.length) {
+              console.log(json);
+              json.forEach(item => { saveReview(item) });
+              return resolve(json);
+            }
+          })
+          .catch(e => { console.log(e) });
+      }
+      
+    });
+  }
+
+
+  static postReviewFetch(data) {
+    return new Promise((resolve, reject)=>{
+      if (!window.navigator.onLine) {
+        //save pending reviews
+        savePendingReviews(data);
+        // add pending data to view
+        data.updatedAt = Date.now();
+        resolve(data);
+      }
+      else {
+        fetch('http://localhost:1337/reviews/', {
+          method: "POST",
+          headers: { "Content-Type": "application/json; charset=utf-8" },
+          mode: "cors",
+          body: JSON.stringify(data)
+        })
+          .then(res => res.json())
+          .then(json => {
+            return resolve(json);
+          })
+          .catch(e => console.log(e));
+      }
+
+    });
+}
 
   /**
    * Fetch restaurants by a cuisine type with proper error handling.
