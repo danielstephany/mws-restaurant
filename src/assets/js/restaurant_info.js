@@ -73,11 +73,23 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;
 
+  const favoritesToggle = document.getElementById('favorite-btn');
+
+  if (restaurant.is_favorite === "true" || restaurant.is_favorite === true){
+    favoritesToggle.innerHTML = 'Remove From Favorites'
+    favoritesToggle.parentElement.classList.add('active');
+  }else {
+    favoritesToggle.innerHTML = 'Add To Favorites'
+    favoritesToggle.parentElement.classList.remove('active');
+  }
+
+
   // fill operating hours
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML();
   }
-  // fill reviews
+  // add event on favorites button
+    setfavoriteEvent();
 
 }
 
@@ -291,3 +303,23 @@ const autoSetHeaderSpace = new SetHeaderSpacer;
   }
 
 })();
+
+//handle updating favorites favorites
+function setfavoriteEvent(){
+  const favoritesToggle = document.getElementById('favorite-btn');
+  favoritesToggle.addEventListener('click', function(){
+    if (self.restaurant.is_favorite === "true" || self.restaurant.is_favorite === true) {
+      console.log('active');
+      favoritesToggle.innerHTML = 'Add To Favorites'
+      favoritesToggle.parentElement.classList.remove('active');
+      self.restaurant.is_favorite = false;
+    } else {
+      favoritesToggle.innerHTML = 'Remove From Favorites'
+      favoritesToggle.parentElement.classList.add('active');
+      self.restaurant.is_favorite = true;
+    }
+    DBHelper.toggleFavorite(self.restaurant.id, self.restaurant)
+    .then(res => console.log(res));
+  });
+  
+};

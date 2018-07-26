@@ -3,16 +3,16 @@
  * serviceWorker
  */
 
-// if ('serviceWorker' in navigator) {
-//   navigator.serviceWorker.register('/sw.js')
-//     .then(function (reg) {
-//       // registration worked
-//       console.log('Registration succeeded. Scope is ' + reg.scope);
-//     }).catch(function (error) {
-//       // registration failed
-//       console.log('Registration failed with ' + error);
-//     });
-// }
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(function (reg) {
+      // registration worked
+      console.log('Registration succeeded. Scope is ' + reg.scope);
+    }).catch(function (error) {
+      // registration failed
+      console.log('Registration failed with ' + error);
+    });
+}
 
 
 const dbPromise = idb.open('restaurant-db', 3, function (upgradeDb) {
@@ -25,7 +25,8 @@ const dbPromise = idb.open('restaurant-db', 3, function (upgradeDb) {
       const restaurantReview = upgradeDb.createObjectStore('reviews');
       restaurantReview.createIndex('restaurant_id', 'restaurant_id');
 
-      upgradeDb.createObjectStore('pendingReviews', { autoIncrement: true });
+      upgradeDb.createObjectStore('pendingReviews');
+      upgradeDb.createObjectStore('pendingFavorites');
   }
 });
 
@@ -47,11 +48,27 @@ function savePendingReviews(data) {
   })
 }
 
+function savePendingFavorites(data, id) {
+  dbPromise.then(function (db) {
+    const tx = db.transaction('pendingFavorites', "readwrite");
+    const pendingFavoritesStore = tx.objectStore('pendingFavorites');
+    return pendingFavoritesStore.put(data, id);
+  })
+}
+
 function clearPendingReviews() {
   dbPromise.then(function (db) {
     const tx = db.transaction('pendingReviews', "readwrite");
     const pendingReviewsStore = tx.objectStore('pendingReviews');
     return pendingReviewsStore.clear();
+  })
+}
+
+function clearPendingFavorites() {
+  dbPromise.then(function (db) {
+    const tx = db.transaction('pendingFavorites', "readwrite");
+    const pendingFavoritesStore = tx.objectStore('pendingFavorites');
+    return pendingFavoritesStore.clear();
   })
 }
 
@@ -120,7 +137,38 @@ function saveReview(data) {
 })();
 
 
+(function () {
+  //add event listener to post pending reviews
+  window.addEventListener('online', function (e) {
+    dbPromise.then(function (db) {
+      const tx = db.transaction('pendingFavorites', "readwrite");
+      const pendingFavoritesStore = tx.objectStore('pendingFavorites');
+      return pendingFavoritesStore.getAll();
+    }).then(function (val) {
+      if (val) {
+        val.forEach((data) => {
+          handlePost(data);
+        });
+      }
+      // clear pending reveiws after submition
+      clearPendingFavorites();
+    });
+  });
 
+  function handlePost(data) {
+    fetch(`http://localhost:1337/restaurants/${data.retaurantId}/?is_favorite=${data.is_favorite}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      mode: "cors"
+    })
+      .then(res => res.json())
+      .then(json => {
+        // saveRestaurantIdData(parseInt(id), json)
+        return console.log(json);
+      })
+      .catch(e => console.log(e));
+  }
+})();
 
 
 /**
@@ -175,20 +223,18 @@ class DBHelper {
     dbPromise.then(function (db) {
       const tx = db.transaction('restaurantId', "readwrite");
       const restaurantIdStore = tx.objectStore('restaurantId');
-      return restaurantIdStore.get(id);
+      return restaurantIdStore.get(parseInt(id));
     }).then(function (val) {
       if(val){
-        callback(null, val);
+        return callback(null, val);
       }
-
       fetch(`${DBHelper.DATABASE_URL}/${id}`)
         .then(res => res.json())
         .then((json) => {
           const restaurants = json;
-          
           if (val === undefined) {
-            saveRestaurantIdData(id, restaurants);
-            callback(null, restaurants);
+            saveRestaurantIdData(parseInt(id), restaurants);
+            return callback(null, restaurants);
           }
         }).catch((e) => {
           const error = (`Request failed. Returned status of ${e}`);
@@ -200,6 +246,7 @@ class DBHelper {
   //fetch store
   static fetchReviews(id){
     return new Promise((resolve, reject)=>{
+      //if not online check for saved reviews data
       if (!window.navigator.onLine) {
         dbPromise.then(function (db) {
           const tx = db.transaction('reviews', "readwrite");
@@ -217,7 +264,6 @@ class DBHelper {
           .then(res => res.json())
           .then(json => {
             if (json.length) {
-              console.log(json);
               json.forEach(item => { saveReview(item) });
               return resolve(json);
             }
@@ -253,6 +299,38 @@ class DBHelper {
       }
 
     });
+}
+
+
+  static toggleFavorite(id, restaurantData){
+  return new Promise((resolve, reject) => {
+    if (!window.navigator.onLine) {
+      //save pending reviews
+      const data = {
+        retaurantId: id,
+        is_favorite: restaurantData.is_favorite
+      }
+      // updated stored restaurant data
+      saveRestaurantIdData(parseInt(id), restaurantData);
+      //add this restaruant to update list
+      savePendingFavorites(data, id);
+      resolve(data);
+    }
+    else {
+      fetch(`http://localhost:1337/restaurants/${id}/?is_favorite=${restaurantData.is_favorite}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        mode: "cors"
+      })
+        .then(res => res.json())
+        .then(json => {
+          saveRestaurantIdData(parseInt(id), json)
+          return resolve(json);
+        })
+        .catch(e => console.log(e));
+    }
+
+  });
 }
 
   /**
