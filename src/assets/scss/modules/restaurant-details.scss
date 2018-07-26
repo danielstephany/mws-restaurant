@@ -15,6 +15,11 @@
   width: 50%;
   z-index: 1000;
 }
+
+#mapImg {
+  display: none;
+}
+
 .inside #map {
   background-color: #ccc;
   height: 100%;
@@ -147,12 +152,12 @@
     font-size: 14px;
     margin: 0;
   }
-  i {
+  span {
     color: #ccc;
-    font-size: 20px;
+    font-size: 24px;
   }
   &.active {
-    i{
+    span{
       color: orange;
     }
   }
@@ -162,7 +167,7 @@
   .inside .map-container {
     box-shadow: none;
     height: 300px;
-    position: static;
+    position: relative;
     right: initial;
     top: initial;
     width: 100%;
@@ -181,5 +186,20 @@
     bottom: initial;
     position: static;
     width: 100%;
+  }
+}
+
+@media (max-width: 600px){
+  #mapImg {
+    display: block;
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    transform: translate(50%, -50%);
+    cursor: pointer;
+  }
+  #map {
+    display: none;
   }
 }

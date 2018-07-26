@@ -71,7 +71,7 @@ gulp.task('minifyCss-noMaps', function () {
         .pipe(cssnano({
             autoprefixer: { browsers: supported, add: true }
         }))
-        // .pipe(rename("main.min.css"))
+        .pipe(rename("main.min.css"))
         .pipe(gulp.dest('./dist/assets/css'))
 });
 

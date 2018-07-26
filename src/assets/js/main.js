@@ -83,6 +83,8 @@ window.initMap = () => {
   updateRestaurants();
 }
 
+
+
 /**
  * Update page and map for current restaurants.
  */
@@ -105,6 +107,8 @@ updateRestaurants = () => {
     }
   })
 }
+
+updateRestaurants();
 
 /**
  * Clear current restaurants, their HTML and remove their map markers.
@@ -135,12 +139,23 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
 /**
  * Create restaurant HTML.
  */
+
+// observer for lazy loading
+const observer = new IntersectionObserver(function (entries, observer){
+  entries.forEach((item)=>{
+    if(item.isIntersecting){
+      item.target.childNodes[0].style.backgroundImage = item.target.childNodes[0].dataset.url;
+    }
+  });
+});
+
 createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
 
   const imgContainer = document.createElement("div");
   imgContainer.className = "image-container"
-  imgContainer.style.backgroundImage = "url("+DBHelper.imageUrlForRestaurant(restaurant) +".jpg)";
+  imgContainer.setAttribute("data-url", "url(" + DBHelper.imageUrlForRestaurant(restaurant) + ".jpg)");
+  // imgContainer.style.backgroundImage = "url("+DBHelper.imageUrlForRestaurant(restaurant) +".jpg)";
   imgContainer.setAttribute("role", "img");
   imgContainer.setAttribute("aria-label", restaurant.name);
   li.append(imgContainer);
@@ -167,6 +182,8 @@ createRestaurantHTML = (restaurant) => {
   details.append(more)
   li.append(details);
 
+  observer.observe(li);
+
   return li
 }
 
@@ -174,12 +191,27 @@ createRestaurantHTML = (restaurant) => {
  * Add markers for current restaurants to the map.
  */
 addMarkersToMap = (restaurants = self.restaurants) => {
+  let latlng = [];
   restaurants.forEach(restaurant => {
-    // Add marker to the map
+    latlng.push( restaurant.latlng.lat +',' + restaurant.latlng.lng);
     const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map);
     google.maps.event.addListener(marker, 'click', () => {
       window.location.href = marker.url
     });
     self.markers.push(marker);
   });
+  const mapImg = document.getElementById('mapImg');
+  latlng = latlng.join('|');
+  let mapstring = `https://maps.googleapis.com/maps/api/staticmap?center=40.722216,-73.987501&zoom=12&size=640x640&maptype=roadmap\&markers=size:mid%7Ccolor:red%7C${latlng}&key=AIzaSyCjj9kjRPGwZDo-MmRAf_g9KRtIBkyyjbY`
+  mapImg.setAttribute('src', mapstring);
 }
+
+//toggle to interactive map
+(function(){
+  const mapImg = document.getElementById('mapImg');
+  const map = document.getElementById('map');
+  mapImg.addEventListener('click', function(){
+    mapImg.style.display = 'none';
+    map.style.display = 'block';
+  });
+})();

@@ -1,6 +1,34 @@
 /* ====================== Map ====================== */
 #map {
+  display: none;
   height: 400px;
   width: 100%;
   background-color: #ccc;
+}
+
+.map-container {
+    height: 320px;
+    position: relative;
+    overflow: hidden;
+}
+
+#mapImg {
+  width: 100%;
+  position: absolute;
+  top: 50%;
+  right: 50%;
+  transform: translate(50%, -50%);
+  cursor: pointer;
+}
+
+@media (min-width: 400px){
+  .map-container {
+      height: 400px;
+  }
+}
+
+@media (min-width: 600px){
+  #map {
+    display: block;
+  }
 }

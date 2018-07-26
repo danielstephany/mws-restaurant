@@ -22,10 +22,10 @@ const dbPromise = idb.open('restaurant-db', 3, function (upgradeDb) {
       const restaurantIdStore = upgradeDb.createObjectStore('restaurantId');
       restaurantIdStore.createIndex('id', 'id');
 
-      const restaurantReview = upgradeDb.createObjectStore('reviews');
+      const restaurantReview = upgradeDb.createObjectStore('reviews', { autoIncrement: true });
       restaurantReview.createIndex('restaurant_id', 'restaurant_id');
 
-      upgradeDb.createObjectStore('pendingReviews');
+      upgradeDb.createObjectStore('pendingReviews', { autoIncrement: true });
       upgradeDb.createObjectStore('pendingFavorites');
   }
 });

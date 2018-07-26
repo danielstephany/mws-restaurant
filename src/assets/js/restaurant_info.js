@@ -15,6 +15,12 @@ window.initMap = () => {
         scrollwheel: false
       });
       fillBreadcrumb();
+
+      const mapImg = document.getElementById('mapImg');
+      let mapstring = `https://maps.googleapis.com/maps/api/staticmap?center=40.722216,-73.987501&zoom=12&size=640x640&maptype=roadmap\&markers=size:mid%7Ccolor:red%7C${restaurant.latlng.lat + "," + restaurant.latlng.lng}&key=AIzaSyCjj9kjRPGwZDo-MmRAf_g9KRtIBkyyjbY`
+      mapImg.setAttribute('src', mapstring);
+
+
       DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
     }
   });
@@ -235,7 +241,7 @@ class SetHeaderSpacer {
 }
 
 const autoSetHeaderSpace = new SetHeaderSpacer;
-// autoSetHeaderSpace.init();
+autoSetHeaderSpace.init();
 
 
 (function(){
@@ -323,3 +329,14 @@ function setfavoriteEvent(){
   });
   
 };
+
+
+// toggle interactive map
+(function () {
+  const mapImg = document.getElementById('mapImg');
+  const map = document.getElementById('map');
+  mapImg.addEventListener('click', function () {
+    mapImg.style.display = 'none';
+    map.style.display = 'block';
+  });
+})();
